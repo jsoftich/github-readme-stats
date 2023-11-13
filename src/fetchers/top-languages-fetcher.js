@@ -24,10 +24,10 @@ const fetcher = (variables, token) => {
   return request(
     {
       query: `
-      query userInfo($login: String!) {
+      query userInfo($login: String!, $afterCursor String) {
         user(login: $login) {
           # fetch only owner repos & not forks
-          repositories(ownerAffiliations: OWNER, first: 10) {
+          repositories(ownerAffiliations: OWNER, first: 100, after: $afterCursor) {
             nodes {
               name
               languages(first: 10, orderBy: {field: SIZE, direction: DESC}) {
@@ -40,6 +40,11 @@ const fetcher = (variables, token) => {
                 }
               }
             }
+            pageInfo {
+              startCursor
+              hasNextPage
+              endCursor
+            }            
           }
         }
       }

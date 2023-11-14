@@ -113,11 +113,11 @@ const fetchTopLanguages = async (
     }
 
     hasNext = res.data.data.user.repositories.pageInfo.hasNextPage;
-    afterCur = res.data.data.user.repositories.pageInfo.afterCursor;
+    afterCur = res.data.data.user.repositories.pageInfo.endCursor;
     repoNodesTmp = [...repoNodesTmp, ...res.data.data.user.repositories.nodes];
   }
 
-  let repoNodes = repoNodesTmp; //res.data.data.user.repositories.nodes;
+  let repoNodes = repoNodesTmp;
   let repoToHide = {};
 
   // populate repoToHide map for quick lookup

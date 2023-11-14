@@ -24,7 +24,7 @@ const fetcher = (variables, token) => {
   return request(
     {
       query: `
-      query userInfo($login: String!, $afterCursor String) {
+      query userInfo($login: String!, $afterCursor: String) {
         user(login: $login) {
           # fetch only owner repos & not forks
           repositories(ownerAffiliations: OWNER, first: 10, after: $afterCursor) {
@@ -44,7 +44,7 @@ const fetcher = (variables, token) => {
               startCursor
               hasNextPage
               endCursor
-            }            
+            }    
           }
         }
       }

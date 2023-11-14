@@ -27,7 +27,7 @@ const fetcher = (variables, token) => {
       query userInfo($login: String!, $afterCursor: String) {
         user(login: $login) {
           # fetch only owner repos & not forks
-          repositories(ownerAffiliations: OWNER, first: 50, after: $afterCursor) {
+          repositories(ownerAffiliations: OWNER, first: 100, after: $afterCursor) {
             nodes {
               name
               languages(first: 10, orderBy: {field: SIZE, direction: DESC}) {

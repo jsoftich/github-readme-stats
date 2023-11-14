@@ -80,7 +80,7 @@ const fetchTopLanguages = async (
     throw new MissingParamError(["username"]);
   }
 
-  let repoNodesTmp = [];
+  let repoNodes = [];
   let hasNext = true;
   let afterCur = "FIRST";
   let res;
@@ -114,10 +114,10 @@ const fetchTopLanguages = async (
 
     hasNext = res.data.data.user.repositories.pageInfo.hasNextPage;
     afterCur = res.data.data.user.repositories.pageInfo.endCursor;
-    repoNodesTmp = [...repoNodesTmp, ...res.data.data.user.repositories.nodes];
+    repoNodes = [...repoNodes, ...res.data.data.user.repositories.nodes];
   }
 
-  let repoNodes = repoNodesTmp;
+  //let repoNodes = repoNodesTmp;
   let repoToHide = {};
 
   // populate repoToHide map for quick lookup

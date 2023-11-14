@@ -27,7 +27,7 @@ const fetcher = (variables, token) => {
       query userInfo($login: String!, $afterCursor String) {
         user(login: $login) {
           # fetch only owner repos & not forks
-          repositories(ownerAffiliations: OWNER, first: 100, after: $afterCursor) {
+          repositories(ownerAffiliations: OWNER, first: 10, after: $afterCursor) {
             nodes {
               name
               languages(first: 10, orderBy: {field: SIZE, direction: DESC}) {
@@ -80,29 +80,44 @@ const fetchTopLanguages = async (
     throw new MissingParamError(["username"]);
   }
 
-  const res = await retryer(fetcher, { login: username });
+  let repoNodesTmp = [];
+  let hasNext = true;
+  let afterCur = "FIRST";
+  let res;
 
-  if (res.data.errors) {
-    logger.error(res.data.errors);
-    if (res.data.errors[0].type === "NOT_FOUND") {
+  while (hasNext) {
+    if (afterCur == "FIRST") {
+      res = await retryer(fetcher, { login: username });
+    } else {
+      res = await retryer(fetcher, { login: username, afterCursor: afterCur });
+    }
+
+    if (res.data.errors) {
+      logger.error(res.data.errors);
+      if (res.data.errors[0].type === "NOT_FOUND") {
+        throw new CustomError(
+          res.data.errors[0].message || "Could not fetch user.",
+          CustomError.USER_NOT_FOUND,
+        );
+      }
+      if (res.data.errors[0].message) {
+        throw new CustomError(
+          wrapTextMultiline(res.data.errors[0].message, 90, 1)[0],
+          res.statusText,
+        );
+      }
       throw new CustomError(
-        res.data.errors[0].message || "Could not fetch user.",
-        CustomError.USER_NOT_FOUND,
+        "Something went wrong while trying to retrieve the language data using the GraphQL API.",
+        CustomError.GRAPHQL_ERROR,
       );
     }
-    if (res.data.errors[0].message) {
-      throw new CustomError(
-        wrapTextMultiline(res.data.errors[0].message, 90, 1)[0],
-        res.statusText,
-      );
-    }
-    throw new CustomError(
-      "Something went wrong while trying to retrieve the language data using the GraphQL API.",
-      CustomError.GRAPHQL_ERROR,
-    );
+
+    hasNext = res.data.data.user.repositories.pageInfo.hasNextPage;
+    afterCur = res.data.data.user.repositories.pageInfo.afterCursor;
+    repoNodesTmp = [...repoNodesTmp, ...res.data.data.user.repositories.nodes];
   }
 
-  let repoNodes = res.data.data.user.repositories.nodes;
+  let repoNodes = repoNodesTmp; //res.data.data.user.repositories.nodes;
   let repoToHide = {};
 
   // populate repoToHide map for quick lookup

@@ -1,7 +1,6 @@
 // @ts-check
 import axios from "axios";
 import toEmoji from "emoji-name-map";
-// @ts-ignore
 import wrap from "word-wrap";
 import { themes } from "../../themes/index.js";
 

@@ -82,15 +82,11 @@ const fetchTopLanguages = async (
 
   let repoNodes = [];
   let hasNext = true;
-  let afterCur = "FIRST";
+  let afterCur = null;
   let res;
 
   while (hasNext) {
-    if (afterCur == "FIRST") {
-      res = await retryer(fetcher, { login: username });
-    } else {
-      res = await retryer(fetcher, { login: username, afterCursor: afterCur });
-    }
+    res = await retryer(fetcher, { login: username, afterCursor: afterCur });
 
     if (res.data.errors) {
       logger.error(res.data.errors);

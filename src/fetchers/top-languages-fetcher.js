@@ -27,7 +27,7 @@ const fetcher = (variables, token) => {
       query userInfo($login: String!, $afterCursor: String) {
         user(login: $login) {
           # fetch only owner repos & not forks
-          repositories(ownerAffiliations: OWNER, first: 100, after: $afterCursor) {
+          repositories(ownerAffiliations: OWNER, isFork: false, first: 100, after: $afterCursor) {
             nodes {
               name
               languages(first: 10, orderBy: {field: SIZE, direction: DESC}) {
@@ -81,12 +81,12 @@ const fetchTopLanguages = async (
   }
 
   let repoNodes = [];
-  let hasNext = true;
-  let afterCur = null;
+  let hasNextPage = true;
+  let afterCursor = null;
   let res;
 
-  while (hasNext) {
-    res = await retryer(fetcher, { login: username, afterCursor: afterCur });
+  while (hasNextPage) {
+    res = await retryer(fetcher, { login: username, afterCursor: afterCursor });
 
     if (res.data.errors) {
       logger.error(res.data.errors);
@@ -108,8 +108,8 @@ const fetchTopLanguages = async (
       );
     }
 
-    hasNext = res.data.data.user.repositories.pageInfo.hasNextPage;
-    afterCur = res.data.data.user.repositories.pageInfo.endCursor;
+    hasNextPage = res.data.data.user.repositories.pageInfo.hasNextPage;
+    afterCursor = res.data.data.user.repositories.pageInfo.endCursor;
     repoNodes = [...repoNodes, ...res.data.data.user.repositories.nodes];
   }
 
